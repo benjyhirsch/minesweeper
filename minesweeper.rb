@@ -7,19 +7,16 @@ class Game
   end
 
   def run
-    initialize
-
-
-    until over?
+    until @board.over?
       take_turn
     end
 
     if @board.won?
-      win_game
+      game_won
     end
 
     if @board.lost?
-      lose_game
+      game_lost
     end
   end
 
@@ -28,11 +25,11 @@ class Game
     #ask user for a move
 
     type = get_move_type
-    row, col = get_move_coordinates
+    position = get_move_coordinates(type)
 
-    @board[row][col].reveal if type == "r"
-    @board[row][col].flag if type == "f"
-    @board[row][col].unflag if type == "u"
+    @board[position].reveal! if type == "r"
+    @board[position].flag! if type == "f"
+    @board[position].unflag! if type == "u"
   end
 
   def get_move_type
@@ -48,38 +45,50 @@ class Game
   end
 
   def get_move_coordinates(type)
-    type_string = ""
-    type_string = "reveal" if type == "r"
-    type_string = "flag" if type == "f"
-    type_string = "unflag" if type == "u"
+    type_string = case type
+      when "r" then "reveal"
+      when "f" then "flag"
+      when "u" then "unflag"
+      end
 
     puts "Please type the indices of the row and column of the square you would like to #{type_string}, separated by a comma."
     puts "(e.g. '0,1' for row 0, column 1)"
 
-    coordinates = gets.chomp.split(",")
-    are_valid_coordinates = coordinates.all? do |coordinate|
-      (0...board_size).map(&:to_s).include?(coordinate)
-    end
+    position = gets.chomp.split(",")
 
-    unless are_valid_coordinates
+    unless valid_position?(position)
       puts "You typed something wrong. Try again."
       return get_move_coordinates(type)
     end
 
-    coordinates.map(&:to_i)
+    position.map(&:to_i)
   end
 
-  def win_game
+  def valid_position?(position)
+    position.all? do |coordinate|
+      (0...@board.board_size).map(&:to_s).include?(coordinate)
+    end && position.count == 2
+  end
+
+  def game_won
     @board.display
 
     puts "You win!"
   end
 
-  def lose_game
-    @board.reveal_all
+  def game_lost
+    @board.reveal_all!
     @board.display
 
     puts "You lose!"
   end
 
+end
+
+
+
+
+if __FILE__ == $PROGRAM_NAME
+  g = Game.new
+  g.run
 end

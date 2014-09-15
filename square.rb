@@ -21,11 +21,11 @@ class Square
     end
   end
 
-  def flag
-    @flagged = true
+  def flag!
+    @flagged = true unless revealed?
   end
 
-  def unflag
+  def unflag!
     @flagged = false
   end
 
@@ -33,12 +33,12 @@ class Square
     @flagged
   end
 
-  def reveal
+  def reveal!
     unless @flagged
       @revealed = true
       if number_of_neighbors_with_bomb == 0
         @neighbors.each do |nbr|
-          nbr.reveal unless nbr.revealed?
+          nbr.reveal! unless nbr.revealed?
         end
       end
     end
@@ -46,7 +46,7 @@ class Square
     nil
   end
 
-  def place_bomb
+  def place_bomb!
     @has_bomb = true
   end
 
@@ -54,8 +54,8 @@ class Square
     @has_bomb
   end
 
-  def add_neighbor(neighbor)
-    @neighbors << neighbor
+  def add_neighbor!(neighbor)
+    @neighbors << neighbor unless @neighbors.include? neighbor
   end
 
   def inspect
