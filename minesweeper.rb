@@ -88,9 +88,9 @@ class Game
   end
 
   def valid_position?(position)
-    position.all? do |coordinate|
+    position.count == 2 && position.all? do |coordinate|
       (0...@board.board_size).map(&:to_s).include?(coordinate)
-    end && position.count == 2
+    end
   end
 
   def game_won
