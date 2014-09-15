@@ -1,10 +1,12 @@
-require_relative 'square'
-require_relative 'board'
+require 'yaml'
+require_relative 'square', 'board'
 
 class Game
+
   def initialize(board_size=9)
     @board = Board.new(board_size)
   end
+
 
   def run
     until @board.over?
@@ -25,18 +27,23 @@ class Game
     #ask user for a move
 
     type = get_move_type
-    position = get_move_coordinates(type)
+    if type == "s"
+      save_game(get_path)
+    else
+      position = get_move_coordinates(type)
 
-    @board[position].reveal! if type == "r"
-    @board[position].flag! if type == "f"
-    @board[position].unflag! if type == "u"
+      @board[position].reveal! if type == "r"
+      @board[position].flag! if type == "f"
+      @board[position].unflag! if type == "u"
+    end
   end
 
   def get_move_type
     puts "Would you like to reveal a square or flag a square or unflag a square? (r/f/u)"
+    puts "(or type 's' to save the game)"
     type = gets.chomp.downcase
 
-    unless ["r","f","u"].include?(type)
+    unless ["r","f","u","s"].include?(type)
       puts "You typed something wrong. Try again"
       return get_move_type
     end
@@ -81,6 +88,18 @@ class Game
     @board.display
 
     puts "You lose!"
+  end
+
+  def save_game(filename)
+    serialized_game = self.to_yaml
+    File.write(filename, serialized_game)
+  end
+
+  def get_path
+    puts "Please type a path to save the game to: "
+    pathname = gets.chomp
+
+    pathname
   end
 
 end
