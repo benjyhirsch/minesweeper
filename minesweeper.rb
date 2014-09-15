@@ -20,8 +20,8 @@ class Game
   end
 
   def run
-    until @board.over? || @to_quit
-      take_turn
+    until @board.over?
+      break unless take_turn
     end
 
     if @board.won?
@@ -42,7 +42,7 @@ class Game
       save_game(get_filename)
       puts "Would you like to continue playing? (y/n)"
 
-      @to_quit = true if gets.chomp[0].downcase == 'n'
+      return false if gets.chomp[0].downcase == 'n'
     else
       position = get_move_coordinates(type)
 
@@ -50,6 +50,8 @@ class Game
       @board[position].flag! if type == "f"
       @board[position].unflag! if type == "u"
     end
+
+    true
   end
 
   def get_move_type
