@@ -1,15 +1,26 @@
 require 'yaml'
-require_relative 'square', 'board'
+require_relative 'square'
+require_relative 'board'
 
 class Game
 
-  def initialize(board_size=9)
-    @board = Board.new(board_size)
+  def self.play_new_game
+    g = Game.new
+    g.run
+  end
+
+  def self.play_saved_game(filename)
+    g = YAML.load(File.read("./saved_games/" + filename))
+    g.run
   end
 
 
+  def initialize(board_size = 9)
+    @board = Board.new(board_size)
+  end
+
   def run
-    until @board.over?
+    until @board.over? || @to_quit
       take_turn
     end
 
@@ -28,7 +39,10 @@ class Game
 
     type = get_move_type
     if type == "s"
-      save_game(get_path)
+      save_game(get_filename)
+      puts "Would you like to continue playing? (y/n)"
+
+      @to_quit = true if gets.chomp[0].downcase == 'n'
     else
       position = get_move_coordinates(type)
 
@@ -92,14 +106,12 @@ class Game
 
   def save_game(filename)
     serialized_game = self.to_yaml
-    File.write(filename, serialized_game)
+    File.write("./saved_games/" + filename, serialized_game)
   end
 
-  def get_path
-    puts "Please type a path to save the game to: "
-    pathname = gets.chomp
-
-    pathname
+  def get_filename
+    puts "Please type a file name for your game"
+    gets.chomp
   end
 
 end
@@ -108,6 +120,19 @@ end
 
 
 if __FILE__ == $PROGRAM_NAME
-  g = Game.new
-  g.run
+  case ARGV.count
+  when 0
+    puts "Would you like to start a new game or load a saved game? (new/saved)"
+
+    if gets.chomp.downcase[0] == "s"
+      puts "What was the name of your saved game?"
+      Game.play_saved_game(gets.chomp)
+    else
+      Game.play_new_game
+    end
+  when 1
+    Game.play_saved_game(ARGV[0])
+  else
+    raise "You typed too many command-line arguments!"
+  end
 end
