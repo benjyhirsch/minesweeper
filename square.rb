@@ -14,7 +14,7 @@ class Square
       "F"
     when @has_bomb && @revealed
       "X"
-    when no_neighbors_with_bomb && @revealed
+    when no_neighbors_with_bomb? && @revealed
       "_"
     else
       number_of_neighbors_with_bomb.to_s
@@ -29,9 +29,21 @@ class Square
     @flagged = false
   end
 
+  def flagged?
+    @flagged
+  end
+
   def reveal
-    @revealed = true
-    neighbors.each(&:reveal) if number_of_neighbors_with_bomb == 0
+    unless @flagged
+      @revealed = true
+      if number_of_neighbors_with_bomb == 0
+        @neighbors.each do |nbr|
+          nbr.reveal unless nbr.revealed?
+        end
+      end
+    end
+
+    nil
   end
 
   def place_bomb
@@ -46,7 +58,13 @@ class Square
     @neighbors << neighbor
   end
 
+  def inspect
+    ""
+  end
 
+  def revealed?
+    @revealed
+  end
 
   private
 
